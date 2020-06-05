@@ -129,21 +129,6 @@ public class IntList {
         return res;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     /**
      * DO NOT MODIFY ANYTHING BELOW THIS LINE! Many of the concepts below here
      * will be introduced later in the course or feature some form of advanced
@@ -221,7 +206,6 @@ public class IntList {
 
         int cnt = 0;
 
-
         while (true) {
             cnt++;
             if (hare.rest != null) {
@@ -266,4 +250,3 @@ public class IntList {
         return out.toString();
     }
 }
-
