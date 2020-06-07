@@ -5,7 +5,7 @@ public class Body {
 	public double xxVel;  // cur x velocity
 	public double yyVel;  // cur y velocity
 	public double mass;  // mass
-	String imgFileName;
+	public String imgFileName;
 	
 	private static final double G = 6.67e-11;
 	
