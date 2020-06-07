@@ -22,6 +22,9 @@ public class LinkedListDeque<T> {
         size = 0;
     }
 
+    /**
+     * @source Got help with Josh Hug from https://www.youtube.com/watch?v=JNroRiEG7U4
+     * */
     public LinkedListDeque(LinkedListDeque<T> other) {
         sentinel = new Node(null, null, null);
         sentinel.prev = sentinel;
@@ -57,12 +60,11 @@ public class LinkedListDeque<T> {
 
     public void printDeque() {
         Node p = sentinel.next;
-        while (p != null) {
+        while (p != sentinel) {
             System.out.print(p.item);
-            if (p.next != null) {
+            if (p.next != sentinel) {
                 System.out.print(" ");
             }
-            System.out.print(" ");
             p = p.next;
         }
         System.out.print("\n");

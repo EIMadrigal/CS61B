@@ -1,1 +1,1 @@
-# CS61B
+CS61B SP18. All the code had been tested on autograder.

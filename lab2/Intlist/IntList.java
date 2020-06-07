@@ -124,7 +124,7 @@ public class IntList {
         if (A == null) {
             return B;
         }
-        IntList res = new IntList(A.first,null);
+        IntList res = new IntList(A.first, null);
         res.rest = catenateRecur(A.rest, B);
         return res;
     }
