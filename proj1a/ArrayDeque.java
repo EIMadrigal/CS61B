@@ -8,9 +8,9 @@ public class ArrayDeque<T> {
 
     public ArrayDeque() {
         // cannot create an array of generic objects T[] items = new T[0]
-        items = (T [])new Object[INIT_CAPACITY];
+        items = (T[]) new Object[INIT_CAPACITY];
     }
-
+    
     public ArrayDeque(ArrayDeque<T> other) {
         for (int i = 0; i < other.size(); ++i) {
             addLast(other.get(i));
@@ -23,7 +23,7 @@ public class ArrayDeque<T> {
         if (rear == front) {
             resize();
         }
-        useRatio = (rear - front + items.length) % items.length;
+        useRatio = 1.0 * size() / items.length;
     }
 
     public void addLast(T item) {
@@ -32,14 +32,14 @@ public class ArrayDeque<T> {
         if (rear == front) {
             resize();
         }
-        useRatio = (rear - front + items.length) % items.length;
+        useRatio = 1.0 * size() / items.length;
     }
 
     // double the size
     private void resize() {
         int curCapacity = items.length;
         int newCapacity = curCapacity << 1;
-        T[] tmp = (T [])new Object[newCapacity];
+        T[] tmp = (T[]) new Object[newCapacity];
         // copy elements from head to last
         System.arraycopy(items, front, tmp, 0, curCapacity - front);
         // copy elements from 0 to head
@@ -72,11 +72,14 @@ public class ArrayDeque<T> {
     }
 
     public T removeFirst() {
+        if (isEmpty()) {
+            return null;
+        }
         T x = items[front];
         items[front] = null;
         front = (front + 1) % items.length;
-        useRatio = (rear - front + items.length) % items.length;
-
+        
+        useRatio = 1.0 * size() / items.length;
         if (items.length >= 16 && useRatio < 0.25) {
             halfSize();
         }
@@ -84,12 +87,15 @@ public class ArrayDeque<T> {
     }
 
     public T removeLast() {
+        if (isEmpty()) {
+            return null;
+        }
         int index = (rear - 1 + items.length) % items.length;
         T x = items[index];
         items[index] = null;
         rear = index;
 
-        useRatio = (rear - front + items.length) % items.length;
+        useRatio = 1.0 * size() / items.length;
         if (items.length >= 16 && useRatio < 0.25) {
             halfSize();
         }
@@ -101,7 +107,7 @@ public class ArrayDeque<T> {
         int newCapacity = curCapacity / 2;
         int curSize = (rear - front + curCapacity) % curCapacity;
         
-        T[] tmp = (T [])new Object[newCapacity];
+        T[] tmp = (T[]) new Object[newCapacity];
         System.arraycopy(items, front, tmp, 0, curSize);
         items = tmp;
         front = 0;

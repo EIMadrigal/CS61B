@@ -3,10 +3,10 @@ public class LinkedListDeque<T> {
     private Node sentinel;
     private int size;
 
-    public class Node {
-        public T item;
-        public Node prev;
-        public Node next;
+    private class Node {
+        private T item;
+        private Node prev;
+        private Node next;
 
         public Node(T item, Node prev, Node next) {
             this.item = item;
@@ -21,10 +21,10 @@ public class LinkedListDeque<T> {
         sentinel.next = sentinel;
         size = 0;
     }
-
+    
     /**
      * @source Got help with Josh Hug from https://www.youtube.com/watch?v=JNroRiEG7U4
-     * */
+     **/ 
     public LinkedListDeque(LinkedListDeque<T> other) {
         sentinel = new Node(null, null, null);
         sentinel.prev = sentinel;
@@ -71,7 +71,7 @@ public class LinkedListDeque<T> {
     }
 
     public T removeFirst() {
-        if (sentinel.next == null) {
+        if (sentinel.next == sentinel) {
             return null;
         }
         size -= 1;
@@ -84,7 +84,7 @@ public class LinkedListDeque<T> {
     }
 
     public T removeLast() {
-        if (sentinel.prev == null) {
+        if (sentinel.prev == sentinel) {
             return null;
         }
         size -= 1;
@@ -108,13 +108,16 @@ public class LinkedListDeque<T> {
     }
 
     public T getRecursive(int index) {
+        return getRecursive(index, sentinel.next);
+    }
+    
+    private T getRecursive(int index, Node start) {
         if (index < 0 || index >= size) {
             return null;
         }
-        if (index + 1 == size) {
-            return sentinel.item;
+        if (index == 0) {
+            return start.item;
         }
-        sentinel = sentinel.next;
-        return getRecursive(index + 1);
+        return getRecursive(index - 1, start.next);
     }
 }
