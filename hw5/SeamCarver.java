@@ -7,7 +7,6 @@ public class SeamCarver {
     private Picture picture;
     private int width;
     private int height;
-    private boolean isVertical = true;
 
     public SeamCarver(Picture picture) {
         this.picture = new Picture(picture);
@@ -71,17 +70,11 @@ public class SeamCarver {
 
         Picture tmp = picture;
         picture = transPic;
-        transPic = tmp;
 
-        isVertical = false;
         swap();
         int[] seq = findVerticalSeam();
 
-        tmp = picture;
-        picture = transPic;
-        transPic = tmp;
-
-        isVertical = true;
+        picture = tmp;
         swap();
         return seq;
     }
