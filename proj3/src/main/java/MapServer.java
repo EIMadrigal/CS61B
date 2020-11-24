@@ -4,12 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -19,6 +14,7 @@ import java.io.IOException;
 import com.google.gson.Gson;
 
 import static spark.Spark.*;
+
 
 /**
  * This MapServer class is the entry point for running the JavaSpark web server for the BearMaps
@@ -50,7 +46,7 @@ public class MapServer {
      * The OSM XML file path. Downloaded from <a href="http://download.bbbike.org/osm/">here</a>
      * using custom region selection.
      **/
-    private static final String OSM_DB_PATH = "../library-sp18/data/berkeley-2018.osm.xml";
+    private static final String OSM_DB_PATH = "../library-sp18/data/berkeley-2018-small.osm.xml";
     /**
      * Each raster request to the server will have the following parameters
      * as keys in the params map accessible by,
@@ -80,6 +76,8 @@ public class MapServer {
     private static Rasterer rasterer;
     private static GraphDB graph;
     private static List<Long> route = new LinkedList<>();
+
+    private static Trie trie;
     /* Define any static variables here. Do not define any instance variables of MapServer. */
 
 
@@ -91,6 +89,12 @@ public class MapServer {
     public static void initialize() {
         graph = new GraphDB(OSM_DB_PATH);
         rasterer = new Rasterer();
+/*
+        trie = new Trie();
+        // insert all node names into the Trie
+        for (GraphDB.Node node : graph.vertex.values()) {
+            trie.insert(node.name, node.id, node.lat, node.lon);
+        }*/
     }
 
     public static void main(String[] args) {
@@ -107,6 +111,7 @@ public class MapServer {
         /* Define the raster endpoint for HTTP GET requests. I use anonymous functions to define
          * the request handlers. */
         get("/raster", (req, res) -> {
+
             HashMap<String, Double> params =
                     getRequestParams(req, REQUIRED_RASTER_REQUEST_PARAMS);
             /* The png image is written to the ByteArrayOutputStream */
@@ -126,6 +131,7 @@ public class MapServer {
             Gson gson = new Gson();
             return gson.toJson(rasteredImgParams);
         });
+
 
         /* Define the routing endpoint for HTTP GET requests. */
         get("/route", (req, res) -> {
@@ -163,6 +169,10 @@ public class MapServer {
                 return gson.toJson(matches);
             }
         });
+
+
+
+
 
         /* Define map application redirect */
         get("/", (request, response) -> {
@@ -285,7 +295,28 @@ public class MapServer {
      * cleaned <code>prefix</code>.
      */
     public static List<String> getLocationsByPrefix(String prefix) {
-        return new LinkedList<>();
+        List<String> locations = new ArrayList<>();
+        // do not need to iterate all the node, just go through the trie, O(k)
+   /*     Trie.TrieNode node = trie.startsWith(prefix);
+        if (node == null) {
+            return locations;
+        }
+        else {
+            dfs(node, prefix, "", locations);
+        }*/
+
+        return locations;
+    }
+
+
+    public static void dfs(Trie.TrieNode node, String prefix, String cur, List<String> ans) {
+        if (node == null) {
+            ans.add(prefix + cur);
+            return;
+        }
+        for (Map.Entry<Character, Trie.TrieNode> entry : node.children.entrySet()) {
+            dfs(entry.getValue(), prefix, cur + entry.getKey(), ans);
+        }
     }
 
     /**
@@ -301,7 +332,12 @@ public class MapServer {
      * "id" : Number, The id of the node. <br>
      */
     public static List<Map<String, Object>> getLocations(String locationName) {
-        return new LinkedList<>();
+        // O(k) do not iterate all the node
+        List<Map<String, Object>> ans = new ArrayList<>();
+       /* if (trie.search(locationName)) {
+            return trie.startsWith(locationName).extraInfo;
+        }*/
+        return ans;
     }
 
     /**
@@ -309,16 +345,17 @@ public class MapServer {
      * @param rip : Parameters provided by the rasterer
      */
     private static boolean validateRasteredImgParams(Map<String, Object> rip) {
-        for (String p : REQUIRED_RASTER_RESULT_PARAMS) {
-            if (!rip.containsKey(p)) {
-                System.out.println("Your rastering result is missing the " + p + " field.");
-                return false;
-            }
-        }
         if (rip.containsKey("query_success")) {
             boolean success = (boolean) rip.get("query_success");
             if (!success) {
                 System.out.println("query_success was reported as a failure");
+                return false;
+            }
+        }
+
+        for (String p : REQUIRED_RASTER_RESULT_PARAMS) {
+            if (!rip.containsKey(p)) {
+                System.out.println("Your rastering result is missing the " + p + " field.");
                 return false;
             }
         }

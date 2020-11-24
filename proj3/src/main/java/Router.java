@@ -1,8 +1,4 @@
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Stack;
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,14 +23,13 @@ public class Router {
      * @param destlat The latitude of the destination location.
      * @return A list of node id's in the order visited on the shortest path.
      */
-
     public static List<Long> shortestPath(GraphDB g, double stlon, double stlat,
                                           double destlon, double destlat) {
         long start = g.closest(stlon, stlat);
         long des = g.closest(destlon, destlat);
 
-        AStarSolver solver = new AStarSolver(g, new GraphDB.Node(start, g.lon(start),
-                g.lat(start)), new GraphDB.Node(des, g.lon(des), g.lat(des)));
+        AStarSolver solver = new AStarSolver(g, GraphDB.Node.of(start, g.lat(start),
+                g.lon(start)), GraphDB.Node.of(des, g.lat(des), g.lon(des)));
 
         Stack<Long> sol = solver.solution();
 
@@ -56,8 +51,26 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
-        return null; // FIXME
+
+        return new LinkedList<>(); // FIXME
     }
+
+    /**
+     * Calculates what direction we are going based on the two bearings, which
+     * are the angles from true north. We compare the angles to see whether
+     * we are making a left turn or right turn. Then we can just use the absolute value of the
+     * difference to give us the degree of turn (straight, sharp, left, or right).
+     * @param prevBearing A double in [0, 360.0]
+     * @param currBearing A double in [0, 360.0]
+     * @return the Navigation Direction type
+     */
+    private static int getDirection(double prevBearing, double currBearing) {
+        double absDiff = Math.abs(currBearing - prevBearing);
+        if (numInRange())
+    }
+
+    /** Checks that a value if between the given ranges. */
+    
 
     /**
      * Class to represent a navigation direction, which consists of 3 attributes:

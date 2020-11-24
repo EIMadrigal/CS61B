@@ -8,6 +8,7 @@ import java.util.Map;
  * not draw the output correctly.
  */
 public class Rasterer {
+    private static final double EPS = 0.01;
 
     /** Depth 0's image's LonDPP */
     private double tile0LonDPP;
@@ -52,12 +53,12 @@ public class Rasterer {
      */
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
 
+
         Map<String, Object> results = new HashMap<>();
 
-        /** corner cases */
-        if (params.get("ullon") < MapServer.ROOT_ULLON || params.get("ullat") > MapServer.ROOT_ULLAT
-                || params.get("lrlon") > MapServer.ROOT_LRLON
-                || params.get("lrlat") < MapServer.ROOT_LRLAT) {
+        if (params.get("ullon") + EPS < MapServer.ROOT_ULLON || params.get("ullat") > MapServer.ROOT_ULLAT + EPS
+                || params.get("lrlon") > MapServer.ROOT_LRLON + EPS
+                || params.get("lrlat") + EPS < MapServer.ROOT_LRLAT) {
             results.put("query_success", false);
             return results;
         }
@@ -79,10 +80,14 @@ public class Rasterer {
         int endY = (int) ((MapServer.ROOT_ULLAT - params.get("lrlat"))
                 / (tileiLatDPP * MapServer.TILE_SIZE));
 
+        int maxXY = (int) Math.pow(2, depth);
+        endX = endX >= maxXY ? maxXY - 1 : endX;
+        endY = endY >= maxXY ? maxXY - 1 : endY;
+
         String[][] renderGrid = new String[endY - startY + 1][endX - startX + 1];
 
-        for (int i = 0; i <= endY - startY; ++i) {
-            for (int j = 0; j <= endX - startX; ++j) {
+        for (int i = 0; i <= endY - startY && i + startY < Math.pow(2, depth); ++i) {
+            for (int j = 0; j <= endX - startX && j + startX < Math.pow(2, depth); ++j) {
                 renderGrid[i][j] = "d" + depth + "_x" + (j + startX) + "_y" + (i + startY) + ".png";
             }
         }

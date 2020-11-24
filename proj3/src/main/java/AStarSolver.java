@@ -33,7 +33,7 @@ public class AStarSolver {
                 this.estimateDis = estimateDisCach.get(node.id);
             } else {
                 this.estimateDis = GraphDB.distance(node.lon, node.lat, goal.lon, goal.lat);
-                estimateDisCach.put(node.id, estimateDis);
+                estimateDisCach.put(node.id, this.estimateDis);
             }
             this.priority = this.estimateDis + disToCur;
         }
