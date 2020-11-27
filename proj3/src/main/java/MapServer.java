@@ -46,7 +46,7 @@ public class MapServer {
      * The OSM XML file path. Downloaded from <a href="http://download.bbbike.org/osm/">here</a>
      * using custom region selection.
      **/
-    private static final String OSM_DB_PATH = "../library-sp18/data/berkeley-2018-small.osm.xml";
+    private static final String OSM_DB_PATH = "../library-sp18/data/berkeley-2018.osm.xml";
     /**
      * Each raster request to the server will have the following parameters
      * as keys in the params map accessible by,
@@ -77,9 +77,7 @@ public class MapServer {
     private static GraphDB graph;
     private static List<Long> route = new LinkedList<>();
 
-    private static Trie trie;
     /* Define any static variables here. Do not define any instance variables of MapServer. */
-
 
     /**
      * Place any initialization statements that will be run before the server main loop here.
@@ -89,12 +87,6 @@ public class MapServer {
     public static void initialize() {
         graph = new GraphDB(OSM_DB_PATH);
         rasterer = new Rasterer();
-/*
-        trie = new Trie();
-        // insert all node names into the Trie
-        for (GraphDB.Node node : graph.vertex.values()) {
-            trie.insert(node.name, node.id, node.lat, node.lon);
-        }*/
     }
 
     public static void main(String[] args) {
@@ -169,10 +161,6 @@ public class MapServer {
                 return gson.toJson(matches);
             }
         });
-
-
-
-
 
         /* Define map application redirect */
         get("/", (request, response) -> {
@@ -289,34 +277,13 @@ public class MapServer {
 
     /**
      * In linear time, collect all the names of OSM locations that prefix-match the query string.
-     * @param prefix Prefix string to be searched for. Could be any case, with our without
+     * @param prefix Prefix string to be searched for. Could be any case, with or without
      *               punctuation.
      * @return A <code>List</code> of the full names of locations whose cleaned name matches the
      * cleaned <code>prefix</code>.
      */
     public static List<String> getLocationsByPrefix(String prefix) {
-        List<String> locations = new ArrayList<>();
-        // do not need to iterate all the node, just go through the trie, O(k)
-   /*     Trie.TrieNode node = trie.startsWith(prefix);
-        if (node == null) {
-            return locations;
-        }
-        else {
-            dfs(node, prefix, "", locations);
-        }*/
-
-        return locations;
-    }
-
-
-    public static void dfs(Trie.TrieNode node, String prefix, String cur, List<String> ans) {
-        if (node == null) {
-            ans.add(prefix + cur);
-            return;
-        }
-        for (Map.Entry<Character, Trie.TrieNode> entry : node.children.entrySet()) {
-            dfs(entry.getValue(), prefix, cur + entry.getKey(), ans);
-        }
+        return graph.getLocationsByPrefix(prefix);
     }
 
     /**
@@ -333,11 +300,7 @@ public class MapServer {
      */
     public static List<Map<String, Object>> getLocations(String locationName) {
         // O(k) do not iterate all the node
-        List<Map<String, Object>> ans = new ArrayList<>();
-       /* if (trie.search(locationName)) {
-            return trie.startsWith(locationName).extraInfo;
-        }*/
-        return ans;
+        return graph.getLocations(locationName);
     }
 
     /**

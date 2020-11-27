@@ -51,8 +51,48 @@ public class Router {
      * route.
      */
     public static List<NavigationDirection> routeDirections(GraphDB g, List<Long> route) {
+        if (route.size() < 2) {
+            return null;
+        }
 
-        return new LinkedList<>(); // FIXME
+        List<NavigationDirection> nd = new ArrayList<>();
+        double prevBearing = 0.0;
+        int direction = NavigationDirection.START;
+        for (int i = 1; i < route.size(); ++i) {
+            long prevNode = route.get(i - 1);
+            long curNode = route.get(i);
+            double curBearing = g.bearing(prevNode, curNode);
+            String curWay = getWay(g, prevNode, curNode);
+            double dis = g.distance(prevNode, curNode);
+            if (i > 1) {
+                direction = getDirection(prevBearing, curBearing);
+            }
+            NavigationDirection turn = new NavigationDirection();
+            turn.direction = direction;
+            turn.distance = dis;
+            turn.way = curWay;
+            nd.add(turn);
+
+            prevBearing = curBearing;
+        }
+        return nd;
+    }
+
+    /**
+     * @param g The graph to use
+     * @param prevNode
+     * @param curNode
+     * @return cur way name
+     */
+    private static String getWay(GraphDB g, long prevNode, long curNode) {
+        for (String a : g.getWayNames(prevNode)) {
+            for (String b : g.getWayNames(curNode)) {
+                if (a.equals(b)) {
+                    return a;
+                }
+            }
+        }
+        return "";
     }
 
     /**
@@ -65,12 +105,36 @@ public class Router {
      * @return the Navigation Direction type
      */
     private static int getDirection(double prevBearing, double currBearing) {
-        double absDiff = Math.abs(currBearing - prevBearing);
-        if (numInRange())
+        double absDiff = Math.abs(prevBearing - currBearing);
+        if (numInRange(absDiff, 0.0, 15.0)) {
+            return NavigationDirection.STRAIGHT;
+        }
+        if ((currBearing > prevBearing && absDiff < 180.0)
+                || (currBearing < prevBearing && absDiff > 180.0)) {
+            // going right
+            if (numInRange(absDiff, 15.0, 30.0) || absDiff > 330.0) {
+                return NavigationDirection.SLIGHT_RIGHT;
+            } else if (numInRange(absDiff, 30.0, 100.0) || absDiff > 260.0) {
+                return NavigationDirection.RIGHT;
+            } else {
+                return NavigationDirection.SHARP_RIGHT;
+            }
+        } else {
+            // going left
+            if (numInRange(absDiff, 15.0, 30.0) || absDiff > 330.0) {
+                return NavigationDirection.SLIGHT_LEFT;
+            } else if (numInRange(absDiff, 30.0, 100.0) || absDiff > 260.0) {
+                return NavigationDirection.LEFT;
+            } else {
+                return NavigationDirection.SLIGHT_LEFT;
+            }
+        }
     }
 
     /** Checks that a value if between the given ranges. */
-    
+    private static boolean numInRange(double value, double from, double to) {
+        return value >= from && value <= to;
+    }
 
     /**
      * Class to represent a navigation direction, which consists of 3 attributes:

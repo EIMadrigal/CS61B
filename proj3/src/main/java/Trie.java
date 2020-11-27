@@ -5,6 +5,8 @@ import java.util.Map;
 
 public class Trie {
 
+    private TrieNode root;
+
     public class TrieNode {
         private TrieNode() {
             children = new HashMap<>();
@@ -13,17 +15,10 @@ public class Trie {
         }
 
         Map<Character, TrieNode> children;
-        private boolean isWord;
-
-
+        public boolean isWord;
         public List<Map<String, Object>> extraInfo;
-        /*
-        private double lat;
-        private double lon;
-        private long id;*/
     }
 
-    TrieNode root;
     public Trie() {
         root = new TrieNode();
     }
@@ -31,6 +26,14 @@ public class Trie {
     public void insert(String word, long id, double lat, double lon) {
         if (word == null)
             return;
+
+        Map<String, Object> m = new HashMap<>();
+        m.put("name", word);
+        m.put("id", id);
+        m.put("lat", lat);
+        m.put("lon", lon);
+
+        word = GraphDB.cleanString(word);
         TrieNode node = root;
         for (char c : word.toCharArray()) {
             if (!node.children.containsKey(c)) {
@@ -39,32 +42,8 @@ public class Trie {
             node = node.children.get(c);
         }
         node.isWord = true;
-
-        // if two words go into the same leaf, latter will cover the former id, lat, lon
-        /*node.id = id;
-        node.lat = lat;
-        node.lon = lon;*/
-
-        Map<String, Object> m = new HashMap<>();
-        m.put("ID", id);
-        m.put("lat", lat);
-        m.put("lon", lon);
         node.extraInfo.add(m);
     }
-
-  /*  public boolean startsWith(String prefix) {
-        if (prefix == null) {
-            return false;
-        }
-        TrieNode node = root;
-        for (char c : prefix.toCharArray()) {
-            if (!node.children.containsKey(c)) {
-                return false;
-            }
-            node = node.children.get(c);
-        }
-        return true;
-    }*/
 
     public TrieNode startsWith(String prefix) {
         if (prefix == null) {

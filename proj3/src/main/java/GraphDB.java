@@ -70,6 +70,10 @@ public class GraphDB {
             this.toID = toID;
             this.name = name;
         }
+
+        public String name() {
+            return name;
+        }
     }
 
     Map<Long, Node> vertex = new HashMap<>();
@@ -91,17 +95,9 @@ public class GraphDB {
             SAXParser saxParser = factory.newSAXParser();
             GraphBuildingHandler gbh = new GraphBuildingHandler(this);
             saxParser.parse(inputStream, gbh);
-
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
-
-        // insert all node names into the Trie
-        for (GraphDB.Node node : this.vertex.values()) {
-            if (node.name != null)
-                trie.insert(node.name, node.id, node.lat, node.lon);
-        }
-
         clean();
     }
 
@@ -191,7 +187,7 @@ public class GraphDB {
      * @param w The id of the second vertex.
      * @return The initial bearing between the vertices.
      */
-    double bearing(long v, long w) {
+    public double bearing(long v, long w) {
         return bearing(lon(v), lat(v), lon(w), lat(w));
     }
 
@@ -251,14 +247,25 @@ public class GraphDB {
     }
 
     public void addNode(Node v) {
-        if (!vertex.containsValue(v)) {
-            vertex.put(v.id, v);
-            adj.put(v.id, new HashSet<>());
+        if (!vertex.containsKey(v.id())) {
+            vertex.put(v.id(), v);
+            adj.put(v.id(), new HashSet<>());
         }
+    }
+
+    public ArrayList<String> getWayNames(long v) {
+        ArrayList<String> wayNames = new ArrayList<>();
+        for (Edge e : adj.get(v)) {
+            wayNames.add(e.name);
+        }
+        return wayNames;
     }
 
     public void addEdge(long fromID, long toID, String name) {
         if (vertex.containsKey(fromID) && vertex.containsKey(toID)) {
+            Node from = vertex.get(fromID);
+            Node to = vertex.get(toID);
+
             Edge edge = new Edge(fromID, toID, name);
             edge.weight = distance(fromID, toID);
 
@@ -268,10 +275,14 @@ public class GraphDB {
         }
     }
 
-    public static List<String> getLocationsByPrefix(String prefix) {
+    void addNameToTrie(String name, long id, double lat, double lon) {
+        trie.insert(name, id, lat, lon);
+    }
+
+    public List<String> getLocationsByPrefix(String prefix) {
         List<String> locations = new ArrayList<>();
         // do not need to iterate all the node, just go through the trie, O(k)
-        Trie.TrieNode node = trie.startsWith(prefix);
+        Trie.TrieNode node = trie.startsWith(cleanString(prefix));
         if (node == null) {
             return locations;
         }
@@ -283,18 +294,24 @@ public class GraphDB {
     }
 
     public static void dfs(Trie.TrieNode node, String prefix, String cur, List<String> ans) {
-        if (node == null) {
-            ans.add(prefix + cur);
+        if (node.isWord) {
+            for (Map<String, Object> m : node.extraInfo) {
+                ans.add((String) m.get("name"));
+            }
+        }
+        if (node.children.isEmpty()) {
             return;
         }
+
         for (Map.Entry<Character, Trie.TrieNode> entry : node.children.entrySet()) {
             dfs(entry.getValue(), prefix, cur + entry.getKey(), ans);
         }
     }
 
-    public static List<Map<String, Object>> getLocations(String locationName) {
+    public List<Map<String, Object>> getLocations(String locationName) {
         // O(k) do not iterate all the node
         List<Map<String, Object>> ans = new ArrayList<>();
+        locationName = cleanString(locationName);
         if (trie.search(locationName)) {
             return trie.startsWith(locationName).extraInfo;
         }

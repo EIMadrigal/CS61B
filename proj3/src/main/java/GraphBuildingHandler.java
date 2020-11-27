@@ -104,7 +104,6 @@ public class GraphBuildingHandler extends DefaultHandler {
             String k = attributes.getValue("k");
             String v = attributes.getValue("v");
             if (k.equals("maxspeed")) {
-
                 /* set the max speed of the "current way" here. */
                 maxSpeed = v;
             } else if (k.equals("highway")) {
@@ -113,7 +112,6 @@ public class GraphBuildingHandler extends DefaultHandler {
                 wayValid = ALLOWED_HIGHWAY_TYPES.contains(v);
             } else if (k.equals("name")) {
                 wayName = v;
-
             }
 
         } else if (activeState.equals("node") && qName.equals("tag") && attributes.getValue("k")
@@ -124,6 +122,7 @@ public class GraphBuildingHandler extends DefaultHandler {
             node this tag belongs to. Remember XML is parsed top-to-bottom, so probably it's the
             last node that you looked at (check the first if-case). */
             curNode.name = attributes.getValue("v");
+            g.addNameToTrie(curNode.name, curNode.id, curNode.lat(), curNode.lon());
         }
     }
 
