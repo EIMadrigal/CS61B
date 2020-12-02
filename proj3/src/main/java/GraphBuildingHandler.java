@@ -107,7 +107,6 @@ public class GraphBuildingHandler extends DefaultHandler {
                 /* set the max speed of the "current way" here. */
                 maxSpeed = v;
             } else if (k.equals("highway")) {
-
                 /* Figure out whether this way and its connections are valid. */
                 wayValid = ALLOWED_HIGHWAY_TYPES.contains(v);
             } else if (k.equals("name")) {

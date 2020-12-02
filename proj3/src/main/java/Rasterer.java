@@ -53,7 +53,6 @@ public class Rasterer {
      */
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
 
-
         Map<String, Object> results = new HashMap<>();
 
         if (params.get("ullon") + EPS < MapServer.ROOT_ULLON || params.get("ullat") > MapServer.ROOT_ULLAT + EPS

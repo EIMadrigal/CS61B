@@ -57,24 +57,43 @@ public class Router {
 
         List<NavigationDirection> nd = new ArrayList<>();
         double prevBearing = 0.0;
+        double curBearing = 0.0;
         int direction = NavigationDirection.START;
+        long startNode = route.get(0);
+        String curWay = getWay(g, route.get(0), route.get(1));
+        double dis = 0.0;
+        //long prevNode = route.get(0);
+        //long curNode = route.get(1);
         for (int i = 1; i < route.size(); ++i) {
             long prevNode = route.get(i - 1);
             long curNode = route.get(i);
-            double curBearing = g.bearing(prevNode, curNode);
-            String curWay = getWay(g, prevNode, curNode);
-            double dis = g.distance(prevNode, curNode);
-            if (i > 1) {
-                direction = getDirection(prevBearing, curBearing);
+
+            prevBearing = curBearing;
+            curBearing = g.bearing(prevNode, curNode);
+
+            if (g.getWayNames(curNode).contains(curWay)) {
+                dis += g.distance(prevNode, curNode);
+                continue;
             }
+
             NavigationDirection turn = new NavigationDirection();
             turn.direction = direction;
             turn.distance = dis;
             turn.way = curWay;
             nd.add(turn);
 
-            prevBearing = curBearing;
+            direction = getDirection(prevBearing, curBearing);
+            startNode = prevNode;
+            dis = g.distance(prevNode, curNode);
+            curWay = getWay(g, prevNode, curNode);
         }
+
+        NavigationDirection turn = new NavigationDirection();
+        turn.direction = direction;
+        turn.distance = dis;
+        turn.way = curWay;
+        nd.add(turn);
+
         return nd;
     }
 
@@ -126,7 +145,7 @@ public class Router {
             } else if (numInRange(absDiff, 30.0, 100.0) || absDiff > 260.0) {
                 return NavigationDirection.LEFT;
             } else {
-                return NavigationDirection.SLIGHT_LEFT;
+                return NavigationDirection.SHARP_LEFT;
             }
         }
     }

@@ -32,10 +32,13 @@ public class GraphDB {
         protected double lat;
         protected String name;
 
+        Set<String> wayNames;
+
         private Node(long id, double lat, double lon) {
             this.id = id;
             this.lat = lat;
             this.lon = lon;
+            wayNames = new HashSet<>();
         }
 
         public static Node of(long id, double lat, double lon) {
@@ -253,19 +256,30 @@ public class GraphDB {
         }
     }
 
+    // set还是array会影响testDirec的结果
+  /*  public Set<String> getWayNames(long v) {
+        Set<String> wayNames = new HashSet<>();
+        for (Edge e : adj.get(v)) {
+            wayNames.add(e.name);
+        }
+        return wayNames;
+    }*/
+
     public ArrayList<String> getWayNames(long v) {
         ArrayList<String> wayNames = new ArrayList<>();
         for (Edge e : adj.get(v)) {
-            wayNames.add(e.name);
+            if (e.name() == null) {
+                wayNames.add(Router.NavigationDirection.UNKNOWN_ROAD);
+            }
+            else {
+                wayNames.add(e.name());
+            }
         }
         return wayNames;
     }
 
     public void addEdge(long fromID, long toID, String name) {
         if (vertex.containsKey(fromID) && vertex.containsKey(toID)) {
-            Node from = vertex.get(fromID);
-            Node to = vertex.get(toID);
-
             Edge edge = new Edge(fromID, toID, name);
             edge.weight = distance(fromID, toID);
 
