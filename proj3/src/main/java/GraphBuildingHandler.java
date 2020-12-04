@@ -120,8 +120,8 @@ public class GraphBuildingHandler extends DefaultHandler {
             /* Since we found this <tag...> INSIDE a node, we should probably remember which
             node this tag belongs to. Remember XML is parsed top-to-bottom, so probably it's the
             last node that you looked at (check the first if-case). */
-            curNode.name = attributes.getValue("v");
-            g.addNameToTrie(curNode.name, curNode.id, curNode.lat(), curNode.lon());
+            curNode.setName(attributes.getValue("v"));
+            g.addNameToTrie(curNode.getName(), curNode.id(), curNode.lat(), curNode.lon());
         }
     }
 

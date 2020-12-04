@@ -56,19 +56,16 @@ public class Router {
         }
 
         List<NavigationDirection> nd = new ArrayList<>();
-        double prevBearing = 0.0;
         double curBearing = 0.0;
         int direction = NavigationDirection.START;
-        long startNode = route.get(0);
+        //long startNode = route.get(0);
         String curWay = getWay(g, route.get(0), route.get(1));
         double dis = 0.0;
-        //long prevNode = route.get(0);
-        //long curNode = route.get(1);
         for (int i = 1; i < route.size(); ++i) {
             long prevNode = route.get(i - 1);
             long curNode = route.get(i);
 
-            prevBearing = curBearing;
+            double prevBearing = curBearing;
             curBearing = g.bearing(prevNode, curNode);
 
             if (g.getWayNames(curNode).contains(curWay)) {
@@ -83,7 +80,7 @@ public class Router {
             nd.add(turn);
 
             direction = getDirection(prevBearing, curBearing);
-            startNode = prevNode;
+            //startNode = prevNode;
             dis = g.distance(prevNode, curNode);
             curWay = getWay(g, prevNode, curNode);
         }

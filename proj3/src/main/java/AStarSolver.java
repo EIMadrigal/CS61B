@@ -29,11 +29,11 @@ public class AStarSolver {
             this.disToCur = disToCur;
             this.node = node;
             this.prev = prev;
-            if (estimateDisCach.containsKey(node.id)) {
-                this.estimateDis = estimateDisCach.get(node.id);
+            if (estimateDisCach.containsKey(node.id())) {
+                this.estimateDis = estimateDisCach.get(node.id());
             } else {
-                this.estimateDis = GraphDB.distance(node.lon, node.lat, goal.lon, goal.lat);
-                estimateDisCach.put(node.id, this.estimateDis);
+                this.estimateDis = GraphDB.distance(node.lon(), node.lat(), goal.lon(), goal.lat());
+                estimateDisCach.put(node.id(), this.estimateDis);
             }
             this.priority = this.estimateDis + disToCur;
         }
@@ -46,29 +46,29 @@ public class AStarSolver {
 
         while (!pq.isEmpty()) {
             curNode = pq.poll();
-            if (visited.contains(curNode.node.id)) {
+            if (visited.contains(curNode.node.id())) {
                 continue;
             }
-            if (curNode.node.id == goal.id) {
+            if (curNode.node.id() == goal.id()) {
                 break;
             }
-            visited.add(curNode.node.id);
-            for (long neighbor : g.adjacent(curNode.node.id)) {
+            visited.add(curNode.node.id());
+            for (long neighbor : g.adjacent(curNode.node.id())) {
                 GraphDB.Node n = g.vertex.get(neighbor);
-                if (visited.contains(n.id)) {
+                if (visited.contains(n.id())) {
                     continue;
                 }
-                if (curNode.prev == null || n.id != curNode.prev.node.id) {
+                if (curNode.prev == null || n.id() != curNode.prev.node.id()) {
                     AugmentNode node = new AugmentNode(n, curNode.disToCur
-                            + g.distance(curNode.node.id, n.id), curNode, goal);
+                            + g.distance(curNode.node.id(), n.id()), curNode, goal);
                     pq.add(node);
                 }
             }
         }
 
-        if (curNode.node.id == goal.id) {
+        if (curNode.node.id() == goal.id()) {
             for (AugmentNode n = curNode; n != null; n = n.prev) {
-                path.push(n.node.id);
+                path.push(n.node.id());
             }
         }
     }

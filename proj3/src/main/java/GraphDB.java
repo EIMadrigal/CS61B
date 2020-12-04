@@ -27,10 +27,10 @@ public class GraphDB {
      * creating helper classes, e.g. Node, Edge, etc. */
 
     protected static class Node {  // protected for the use of GraphBuildingHandler
-        protected long id;
-        protected double lon;
-        protected double lat;
-        protected String name;
+        private long id;
+        private double lon;
+        private double lat;
+        private String name;
 
         Set<String> wayNames;
 
@@ -57,8 +57,12 @@ public class GraphDB {
             return lon;
         }
 
-        public String name() {
+        public String getName() {
             return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 
@@ -90,14 +94,15 @@ public class GraphDB {
      */
     public GraphDB(String dbPath) {
         try {
-            File inputFile = new File(dbPath);
-            FileInputStream inputStream = new FileInputStream(inputFile);
+//            File inputFile = new File(dbPath);
+//            FileInputStream inputStream = new FileInputStream(inputFile);
             // GZIPInputStream stream = new GZIPInputStream(inputStream);
 
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
             GraphBuildingHandler gbh = new GraphBuildingHandler(this);
-            saxParser.parse(inputStream, gbh);
+//            saxParser.parse(inputStream, gbh);
+            saxParser.parse(Thread.currentThread().getContextClassLoader().getResourceAsStream(dbPath), gbh);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             e.printStackTrace();
         }
@@ -256,7 +261,6 @@ public class GraphDB {
         }
     }
 
-    // set还是array会影响testDirec的结果
   /*  public Set<String> getWayNames(long v) {
         Set<String> wayNames = new HashSet<>();
         for (Edge e : adj.get(v)) {
